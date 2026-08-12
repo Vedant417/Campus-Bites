@@ -620,44 +620,6 @@ The seed script populates the database with the initial café, menu, user, and s
 
 ---
 
-# 👤 Development Accounts
-
-The development seed includes accounts for different application roles.
-
-### 🎓 Student
-
-```text
-student@bites.edu
-```
-
-### 👨‍🍳 Mayuri Staff
-
-```text
-mayuri@bites.edu
-```
-
-### 👨‍🍳 Bistro Staff
-
-```text
-bistro@bites.edu
-```
-
-### 👨‍🍳 AB Dakshin Staff
-
-```text
-dakshin@bites.edu
-```
-
-### 🛠️ Admin
-
-```text
-admin@bites.edu
-```
-
-> **Note:** Development passwords are defined by the project's seed configuration.
-
----
-
 # 🔄 API Structure
 
 The backend follows a modular REST API architecture.
