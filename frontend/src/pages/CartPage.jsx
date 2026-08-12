@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Trash2, ShoppingBag, ArrowRight, ArrowLeft, Utensils, Box, Plus, Minus } from 'lucide-react';
+import API from '../services/api';
+import toast from 'react-hot-toast';
 
 export default function CartPage() {
   const { cartItems, cartCafe, orderType, setOrderType, updateQuantity, removeFromCart, subtotal, parcelCharge, total } = useCart();
@@ -15,7 +17,7 @@ export default function CartPage() {
       // Retrieve the latest cafe status from the server
       const res = await API.get(`/cafes/${cartCafe.slug}`);
       if (res.data.success && !res.data.data.isActive) {
-        alert(`${cartCafe.name} Cafe is currently closed. You cannot proceed to checkout.`);
+        toast.error(`${cartCafe.name} Cafe is currently closed. You cannot proceed to checkout.`);
         return;
       }
     } catch (err) {

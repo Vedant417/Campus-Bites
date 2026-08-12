@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import MobileNav from './components/MobileNav';
+import { Toaster } from 'react-hot-toast';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -47,7 +48,7 @@ function RoleProtectedRoute({ children, allowedRoles }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream-100">
+      <div className="min-h-screen flex items-center justify-center bg-cream-150">
         <div className="w-10 h-10 border-4 border-accent-orange border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -133,6 +134,25 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <AppLayout />
+          <Toaster 
+            position="top-right" 
+            reverseOrder={false}
+            toastOptions={{
+              className: 'font-sans text-xs font-semibold rounded-2xl border border-stone-100 shadow-lg p-3 bg-white text-stone-850',
+              success: {
+                iconTheme: {
+                  primary: '#10b981',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
         </CartProvider>
       </AuthProvider>
     </Router>

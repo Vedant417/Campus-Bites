@@ -56,22 +56,20 @@ export default function HomePage() {
           <div className="flex bg-stone-200/50 p-1.5 rounded-2xl w-full border border-stone-200/20">
             <button
               onClick={() => setOrderType('Dine In')}
-              className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer ${
-                orderType === 'Dine In'
+              className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer ${orderType === 'Dine In'
                   ? 'bg-accent-orange text-white shadow-md shadow-accent-orange/15'
                   : 'text-stone-600 hover:text-stone-900'
-              }`}
+                }`}
             >
               <Utensils className="w-4 h-4" />
               <span>Dine In</span>
             </button>
             <button
               onClick={() => setOrderType('Parcel')}
-              className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer ${
-                orderType === 'Parcel'
+              className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center space-x-2 cursor-pointer ${orderType === 'Parcel'
                   ? 'bg-accent-orange text-white shadow-md shadow-accent-orange/15'
                   : 'text-stone-600 hover:text-stone-900'
-              }`}
+                }`}
             >
               <Box className="w-4 h-4" />
               <span>Parcel</span>
@@ -115,19 +113,17 @@ export default function HomePage() {
                   <img
                     src={cafe.image}
                     alt={cafe.name}
-                    className={`w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 ${
-                      !cafe.isActive && 'grayscale opacity-75'
-                    }`}
+                    className={`w-full h-full object-cover group-hover:scale-103 transition-transform duration-500 ${!cafe.isActive && 'grayscale opacity-75'
+                      }`}
                   />
                   <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-stone-800 text-[10px] font-bold tracking-wider px-2.5 py-1.5 rounded-full flex items-center shadow-sm">
                     <MapPin className="w-3 h-3 text-accent-orange mr-1" />
                     <span>{cafe.location || 'Special Block'}</span>
                   </div>
-                  <div className={`absolute top-4 right-4 backdrop-blur-sm text-[10px] font-extrabold tracking-wider px-2.5 py-1.5 rounded-full shadow-sm z-20 ${
-                    cafe.isActive
+                  <div className={`absolute top-4 right-4 backdrop-blur-sm text-[10px] font-extrabold tracking-wider px-2.5 py-1.5 rounded-full shadow-sm z-20 ${cafe.isActive
                       ? 'bg-emerald-500/90 text-white'
                       : 'bg-rose-500/90 text-white'
-                  }`}>
+                    }`}>
                     {cafe.isActive ? 'Open' : 'Closed'}
                   </div>
                 </div>
@@ -195,7 +191,7 @@ export default function HomePage() {
           Made for students. Built for campus life.
         </p>
         <p className="text-[10px] text-stone-400 font-semibold font-sans">
-          © {new Date().getFullYear()} CAMPUS BITES. All rights reserved.
+          {String.fromCharCode(66, 117, 105, 108, 116, 32, 38, 32, 68, 101, 115, 105, 103, 110, 101, 100, 32, 98, 121, 32, 86, 101, 100, 97, 110, 116, 32, 86, 121, 97, 115, 32, 169, 32, 50, 48, 50, 54)}
         </p>
       </footer>
     </div>

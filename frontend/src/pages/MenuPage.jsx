@@ -5,11 +5,12 @@ import API from '../services/api';
 import { MenuItemSkeleton } from '../components/SkeletonLoader';
 import ConflictModal from '../components/ConflictModal';
 import RatingModal from '../components/RatingModal';
-import { Utensils, Box, ArrowLeft, ShoppingBag, Plus, Minus, Star, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Utensils, Box, ArrowLeft, ShoppingBag, Plus, Minus, Star, Tag, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 /* ─────────────────────────────────────────────
    Inline star display (mini)
-───────────────────────────────────────────── */
+ ───────────────────────────────────────────── */
 function MiniStars({ rating }) {
   const filled = Math.round(rating);
   return (
@@ -41,6 +42,7 @@ export default function MenuPage() {
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -99,10 +101,14 @@ export default function MenuPage() {
     return () => el.removeEventListener('scroll', updateScrollButtons);
   }, [categories, updateScrollButtons]);
 
-  // Filter items based on active category
-  const filteredItems = activeCategory === 'All'
-    ? menuItems
-    : menuItems.filter((item) => item.category === activeCategory);
+  // Filter items based on active category and search query
+  const filteredItems = menuItems.filter((item) => {
+    const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
 
   // Check quantity of an item currently in the cart
   const getItemQuantity = (itemId) => {
@@ -112,7 +118,7 @@ export default function MenuPage() {
 
   const handleAddToCart = (item) => {
     if (cafe && !cafe.isActive) {
-      alert("This café is currently closed. You cannot add items to cart.");
+      toast.error("This café is currently closed. You cannot add items to cart.");
       return;
     }
     addToCart(item, { _id: cafe._id, name: cafe.name, slug: cafe.slug });
@@ -120,7 +126,7 @@ export default function MenuPage() {
 
   const handleUpdateQuantity = (itemId, change) => {
     if (cafe && !cafe.isActive) {
-      alert("This café is currently closed. You cannot modify the cart.");
+      toast.error("This café is currently closed. You cannot modify the cart.");
       return;
     }
     updateQuantity(itemId, change);
@@ -291,6 +297,28 @@ export default function MenuPage() {
 
           </div>
 
+          {/* Search Bar aligned to the right, above the food cards */}
+          <div className="flex justify-end w-full px-1">
+            <div className="relative w-full max-w-xs">
+              <input
+                type="text"
+                placeholder="Search food item..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 text-xs font-semibold bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition-all duration-300 shadow-sm placeholder-stone-400 text-stone-850"
+              />
+              <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-750 hover:bg-stone-50 border border-stone-200 rounded-md px-1 py-0.5 text-[9px] font-extrabold cursor-pointer"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Menu Items Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredItems.map((item) => {
@@ -436,8 +464,22 @@ export default function MenuPage() {
 
           {/* Empty state */}
           {filteredItems.length === 0 && (
-            <div className="text-center py-12 space-y-2">
-              <p className="text-stone-500 font-medium">No items found in this category.</p>
+            <div className="text-center py-12 space-y-2 bg-stone-50 border border-dashed border-stone-200/65 rounded-[2rem] p-8 max-w-md mx-auto">
+              <Utensils className="w-8 h-8 text-stone-300 mx-auto mb-2" />
+              <p className="text-stone-500 font-bold text-sm">
+                {searchQuery ? 'No dishes match your search.' : 'No items found in this category.'}
+              </p>
+              <p className="text-stone-400 text-xs font-medium">
+                {searchQuery ? 'Try typing another dish or clearing search filters.' : 'Check back later for fresh updates.'}
+              </p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="mt-3 text-xs font-bold text-accent-orange hover:underline cursor-pointer bg-white px-3 py-1.5 border border-stone-200 rounded-xl shadow-sm transition-all"
+                >
+                  Clear search
+                </button>
+              )}
             </div>
           )}
         </>

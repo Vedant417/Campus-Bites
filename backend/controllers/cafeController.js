@@ -96,10 +96,10 @@ exports.addMenuItem = async (req, res) => {
   try {
     const { cafeId, name, description, category, price, image, isVeg, isAvailable } = req.body;
 
-    if (!cafeId || !name || !description || !category || !price) {
+    if (!cafeId || !name || !category || !price) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide cafeId, name, description, category, and price',
+        message: 'Please provide cafeId, name, category, and price',
       });
     }
 

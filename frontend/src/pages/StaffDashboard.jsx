@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { ChefHat, Package, Check, Play, AlertCircle, RefreshCw, Box, Utensils, XCircle, Trash2, Plus, Upload } from 'lucide-react';
+import { ChefHat, Package, Check, Play, AlertCircle, RefreshCw, Box, Utensils, XCircle, Trash2, Plus, Upload, Search } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function StaffDashboard() {
   const { user } = useAuth();
@@ -51,6 +52,7 @@ export default function StaffDashboard() {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -66,7 +68,7 @@ export default function StaffDashboard() {
   const handleAddNewItem = async (e) => {
     e.preventDefault();
     if (!newItemData.name || !newItemData.price) {
-      alert('Please fill in required fields (Name and Price).');
+      toast.error('Please fill in required fields (Name and Price).');
       return;
     }
     try {
@@ -78,7 +80,7 @@ export default function StaffDashboard() {
         : newItemData.category;
 
       if (!finalCategory) {
-        alert('Please specify a category.');
+        toast.error('Please specify a category.');
         setIsSubmitting(false);
         return;
       }
@@ -86,7 +88,7 @@ export default function StaffDashboard() {
       const payload = {
         cafeId,
         name: newItemData.name,
-        description: newItemData.description,
+        description: newItemData.description.trim() || 'Delicious food item.',
         category: finalCategory,
         price: Number(newItemData.price),
         image: newItemData.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
@@ -96,6 +98,7 @@ export default function StaffDashboard() {
       const res = await API.post('/cafes/menu', payload);
       if (res.data.success) {
         setMenuItems(prev => [...prev, res.data.data]);
+        toast.success('Dish added successfully!');
         setIsAddModalOpen(false);
         setNewItemData({
           name: '',
@@ -109,7 +112,8 @@ export default function StaffDashboard() {
       }
     } catch (err) {
       console.error('Error adding new menu item:', err);
-      alert('Failed to add new item. Please check all fields.');
+      const serverMsg = err.response?.data?.message || err.message;
+      toast.error(`Failed to add new item: ${serverMsg}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -121,12 +125,13 @@ export default function StaffDashboard() {
       const res = await API.delete(`/cafes/menu/${itemToDelete._id}`);
       if (res.data.success) {
         setMenuItems(prev => prev.filter(i => i._id !== itemToDelete._id));
+        toast.success('Dish deleted successfully!');
         setIsDeleteModalOpen(false);
         setItemToDelete(null);
       }
     } catch (err) {
       console.error('Error deleting menu item:', err);
-      alert('Failed to delete item. Please try again.');
+      toast.error('Failed to delete item. Please try again.');
     }
   };
 
@@ -153,10 +158,11 @@ export default function StaffDashboard() {
         setMenuItems(prev =>
           prev.map(item => item._id === itemId ? { ...item, isAvailable: !currentStatus } : item)
         );
+        toast.success(currentStatus ? 'Marked out of stock!' : 'Marked in stock!');
       }
     } catch (err) {
       console.error('Error toggling menu item status:', err);
-      alert('Failed to update stock status.');
+      toast.error('Failed to update stock status.');
     }
   };
 
@@ -200,10 +206,11 @@ export default function StaffDashboard() {
             order._id === orderId ? { ...order, orderStatus: newStatus } : order
           )
         );
+        toast.success(`Order status updated to ${newStatus}!`);
       }
     } catch (err) {
       console.error('Error updating order status:', err);
-      alert('Failed to update status. Please try again.');
+      toast.error('Failed to update status. Please try again.');
     }
   };
 
@@ -229,6 +236,12 @@ export default function StaffDashboard() {
   const completedCount = orders.filter((o) => o.orderStatus === 'COMPLETED').length;
 
   const cafeName = user?.cafeId?.name || 'Campus';
+
+  // Filter menu items by search query
+  const filteredMenuItems = menuItems.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Helper for rendering items inline
   const renderItemDetails = (items) => {
@@ -499,6 +512,25 @@ export default function StaffDashboard() {
             <p className="text-xs text-stone-500">Toggle dish availability or manage your menu in real-time.</p>
           </div>
           <div className="flex items-center space-x-3">
+            {/* Search Input Bar */}
+            <div className="relative w-44 sm:w-56">
+              <input
+                type="text"
+                placeholder="Search stock..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-7 py-1.5 text-xs font-semibold bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange transition-all duration-300 shadow-sm placeholder-stone-400 text-stone-850"
+              />
+              <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-405 hover:text-stone-700 text-[10px] font-extrabold cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
             <span className="bg-stone-100 text-stone-850 text-xs font-bold px-3 py-1.5 rounded-xl border border-stone-200/40">
               {menuItems.length} items
             </span>
@@ -519,7 +551,7 @@ export default function StaffDashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {menuItems.map((item) => (
+            {filteredMenuItems.map((item) => (
               <div
                 key={item._id}
                 className="bg-stone-50 hover:bg-stone-100/50 border border-stone-200/40 rounded-2xl p-4 flex items-center justify-between transition-all duration-200"
@@ -557,6 +589,20 @@ export default function StaffDashboard() {
                 </div>
               </div>
             ))}
+            {filteredMenuItems.length === 0 && (
+              <div className="col-span-full py-12 text-center bg-stone-50 border border-dashed border-stone-200/60 rounded-3xl space-y-2">
+                <Utensils className="w-8 h-8 text-stone-300 mx-auto" />
+                <p className="text-stone-500 font-bold text-xs">No matching dishes found in your menu.</p>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-[10px] font-bold text-accent-orange hover:underline cursor-pointer bg-white px-2.5 py-1 border border-stone-200 rounded-lg shadow-sm transition-all animate-fade-in"
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -688,18 +734,28 @@ export default function StaffDashboard() {
                   </div>
                 </div>
                 {newItemData.image && (
-                  <div className="mt-2.5 p-2 bg-stone-50 border border-stone-100 rounded-2xl flex items-center space-x-3">
-                    <img
-                      src={newItemData.image}
-                      alt="Preview"
-                      className="w-12 h-12 object-cover rounded-xl border border-stone-200/50"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <span className="text-[10px] text-stone-400 font-bold block">IMAGE PREVIEW</span>
-                      <span className="text-xs text-stone-600 font-semibold truncate block">
-                        {newItemData.image.startsWith('data:') ? 'Local Base64 Image File' : newItemData.image}
-                      </span>
+                  <div className="mt-2.5 p-2 bg-stone-50 border border-stone-100 rounded-2xl flex items-center justify-between space-x-3">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <img
+                        src={newItemData.image}
+                        alt="Preview"
+                        className="w-12 h-12 object-cover rounded-xl border border-stone-200/50"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-stone-400 font-bold block">IMAGE PREVIEW</span>
+                        <span className="text-xs text-stone-600 font-semibold truncate block">
+                          {newItemData.image.startsWith('data:') ? 'Local Base64 Image File' : newItemData.image}
+                        </span>
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setNewItemData(prev => ({ ...prev, image: '' }))}
+                      className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 border border-stone-200 rounded-xl transition-all duration-200 cursor-pointer flex-shrink-0"
+                      title="Remove Image"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 )}
               </div>

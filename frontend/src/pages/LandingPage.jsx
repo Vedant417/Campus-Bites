@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import { ArrowRight, Coffee, ShieldCheck, Zap, Sparkles, MapPin } from 'lucide-react';
 
 export default function LandingPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [cafes, setCafes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  if (isAuthenticated && user) {
+    if (user.role === 'cafe_staff') {
+      return <Navigate to="/staff" replace />;
+    }
+    if (user.role === 'admin') {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/home" replace />;
+  }
 
   const cafeStyles = {
     'mayuri-special-block': {
@@ -243,7 +253,7 @@ export default function LandingPage() {
           Made for students. Built for campus life.
         </p>
         <p className="text-[10px] text-stone-400 font-semibold font-sans">
-          © {new Date().getFullYear()} CAMPUS BITES. All rights reserved.
+          {String.fromCharCode(66, 117, 105, 108, 116, 32, 38, 32, 68, 101, 115, 105, 103, 110, 101, 100, 32, 98, 121, 32, 86, 101, 100, 97, 110, 116, 32, 86, 121, 97, 115, 32, 169, 32, 50, 48, 50, 54)}
         </p>
       </footer>
     </div>

@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import API from '../services/api';
 import { User, Phone, Mail, ArrowLeft, ShieldCheck, MapPin, Box, Utensils } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
   const { cartItems, cartCafe, orderType, subtotal, parcelCharge, total } = useCart();
@@ -24,7 +25,7 @@ export default function CheckoutPage() {
     try {
       const res = await API.get(`/cafes/${cartCafe.slug}`);
       if (res.data.success && !res.data.data.isActive) {
-        alert(`${cartCafe.name} Cafe is currently closed. You cannot complete payment.`);
+        toast.error(`${cartCafe.name} Cafe is currently closed. You cannot complete payment.`);
         return;
       }
     } catch (err) {
